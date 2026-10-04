@@ -43,7 +43,11 @@
       </thead>
       <tbody>
         <tr v-for="row in rows" :key="String(row.id)">
-          <td v-for="column in columns" :key="column">{{ row[column] ?? '—' }}</td>
+          <td>
+            {{ row[columns[0]] ?? '—' }}
+            <span v-if="String(row['工作票号'] ?? '').startsWith('RET-')" class="ret-tag">退役办结</span>
+          </td>
+          <td v-for="column in columns.slice(1)" :key="column">{{ row[column] ?? '—' }}</td>
           <td>{{ row.status }}</td>
           <td class="row-actions">
             <button
@@ -85,13 +89,17 @@ const meta = moduleMeta('workpermit')
 const columns = ["工作票号", "工作任务", "所属变电站", "停电范围", "工作负责人", "许可时间", "终结时间", "许可状态"]
 const actions = ["签发许可", "办理终结", "作废工作票"]
 const statuses = ["待签发", "已许可", "已终结", "已作废"]
-const stats = [{"label": "待签发工作票", "value": 0}, {"label": "已许可工作票", "value": 0}, {"label": "已终结工作票", "value": 0}]
 
 const rows = ref<EntryRow[]>([])
 const total = ref(0)
 const errorMessage = ref('')
 const filters = ref<Record<string, string>>({})
 const filterFields = columns.slice(0, 3)
+const stats = computed(() => [
+  { label: "待签发工作票", value: rows.value.filter((row) => String(row.status) === "待签发").length },
+  { label: "已许可工作票", value: rows.value.filter((row) => String(row.status) === "已许可").length },
+  { label: "已终结工作票", value: rows.value.filter((row) => String(row.status) === "已终结").length },
+])
 const statusSummary = computed(() =>
   statuses.map((status: string) => ({
     status,
@@ -135,3 +143,15 @@ function reload() {
 
 onMounted(reload)
 </script>
+
+<style scoped>
+.ret-tag {
+  display: inline-block;
+  margin-left: 6px;
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 12px;
+}
+</style>

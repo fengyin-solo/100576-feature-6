@@ -85,3 +85,6 @@ desktop.ini
 *.db
 *.pid
 *.seed
+
+# 冒烟测试专用构建产物
+dist-smoke/

@@ -1,6 +1,12 @@
 import { MODULE_BY_KEY } from '@/data/modules'
 import { allRows, listRows, resetRows, saveRows } from '@/data/local-store'
 import type { ActionResult, EntryRow, ModuleMeta, OverviewResult, PageResult } from '@/data/types'
+import { useSessionStore } from '@/stores/session'
+import {
+  resetSubstationDomain,
+  runStationStatusAction,
+  submitRetirement,
+} from './substation-domain'
 
 // 会写进数据的「往回走」动作：命中就把这条记录标成异常态，看板上能一眼看出来。
 const NEGATIVE_ACTIONS = ['撤销', '作废', '拒绝', '驳回', '停用', '忽略', '下线', '回滚']
@@ -34,6 +40,16 @@ export function runAction(key: string, id: number, action: string): ActionResult
   if (!target) {
     return { ok: false, message: `${meta.entity}没有登记「${action}」这个动作` }
   }
+
+  // 变电站台账的动作走归属域：只有归属供电所值班人能办，退役后整条只读。
+  if (key === 'substation') {
+    const operator = useSessionStore().operator
+    if (action === '办理退役') {
+      return submitRetirement(id, operator, '按年度退役计划办理退役')
+    }
+    return runStationStatusAction(id, action, target, operator)
+  }
+
   const rows = listRows(key)
   const index = rows.findIndex((row) => Number(row.id) === id)
   if (index < 0) {
@@ -58,6 +74,10 @@ export function runAction(key: string, id: number, action: string): ActionResult
 
 export function resetModule(key: string): PageResult {
   resetRows(key)
+  // 变电站模块重置时，归属流水与退役联动工作票一并回到示例。
+  if (key === 'substation') {
+    resetSubstationDomain()
+  }
   return listEntries(key)
 }
 
