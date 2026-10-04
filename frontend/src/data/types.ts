@@ -27,6 +27,18 @@ export type PageResult = {
   size: number
 }
 
+/** 变电站名册的变更/移交记录：谁在什么时间做了什么，退回也留理由。 */
+export type LedgerRecord = {
+  time: string
+  operator: string
+  station: string
+  action: string
+  detail: string
+  result: '已受理' | '已退回'
+  /** 受理时认可的站名快照：列表与详情口径冲突时，以最近一次带快照的记录为准。 */
+  snapshotName?: string
+}
+
 export type ActionResult = {
   ok: boolean
   message: string

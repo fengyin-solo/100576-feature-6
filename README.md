@@ -65,7 +65,10 @@ npm run build
 
 - 每个模块的页面在 `frontend/src/views/<模块>/index.vue`，页面只负责渲染，读写统一走
   `frontend/src/api/local-service.ts`。
+- 变电站名册的归属管控（所属供电所校验、退役只读、交接班移交、退役联动工作票待办）单独收在
+  `frontend/src/api/substation-service.ts`，变更与移交记录持久化在
+  `substation-protection:substation-ledger`（见 `frontend/src/data/substation-ledger.ts`）。
 - 字段、状态、动作与流转目标集中在 `frontend/src/data/modules.ts`；示例数据在
   `frontend/src/data/seed.ts`。
-- 状态流转只允许在 `local-service.ts` 里改，页面组件不做业务判断。
+- 状态流转只允许在 `local-service.ts` / `substation-service.ts` 里改，页面组件不做业务判断。
 - 想回到初始数据：清掉浏览器里 `substation-protection:entries` 这一项，或调用 `resetModule(模块)`。
